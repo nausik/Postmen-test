@@ -11,7 +11,7 @@ app.use(Express.static('public'));
 app.use(BodyParser.json());
 
 models.sequelize.sync({
-    force: true
+    force: false
 });
 
 app.get('/movies/search/:query', (req, res) => {
@@ -21,6 +21,9 @@ app.get('/movies/search/:query', (req, res) => {
 
     models.Movie.findAll({
         limit,
+        order: [
+            ['end_date', 'DESC']
+        ],
         where: {
             name: {
                 [Sequelize.Op.like]: `%${req.params.query}%`
@@ -50,7 +53,7 @@ app.get('/movies/:offset/:limit', (req, res) => {
         limit: req.params.limit,
         offset: req.params.offset,
         order: [
-            Sequelize.fn('max', Sequelize.col('end_date'), 'DESC')
+            ['end_date', 'DESC']
         ],
         where: {
             end_date: {
@@ -121,7 +124,7 @@ function getSimilarMovies(movie) {
             movies_search_params = {
                 limit: 5,
                 order: [
-                    Sequelize.fn('max', Sequelize.col('end_date'), 'DESC')
+                    ['end_date', 'DESC']
                 ],
                 end_date: {
                     [Sequelize.Op.gt]: new Date()
